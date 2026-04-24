@@ -1,0 +1,605 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+--g:#00ff9f;--gd:#00cc7a;--gdk:#003d26;--gf:#00ff9f12;
+--r:#ff3c5a;--rf:#ff3c5a15;--a:#ffaa00;--af:#ffaa0015;
+--c:#00d4ff;--cf:#00d4ff15;--p:#b94fff;--pf:#b94fff15;
+--bg:#050f0a;--bg2:#091510;--bg3:#0d1e14;--bg4:#112518;
+--bd:#00ff9f28;--mono:'Share Tech Mono',monospace;
+--disp:'Orbitron',monospace;--body:'Rajdhani',sans-serif;
+--txt:#b8efd0;--txt2:#5a8a6a;
+}
+.app{background:var(--bg);font-family:var(--mono);color:var(--g);border:1px solid var(--bd);border-radius:3px;overflow:hidden;}
+.scanline{position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,159,.012) 2px,rgba(0,255,159,.012) 4px);pointer-events:none;z-index:0;}
+
+/* TOPBAR */
+.topbar{background:var(--bg2);border-bottom:1px solid var(--bd);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:2;}
+.logo{font-family:var(--disp);font-size:13px;font-weight:900;color:var(--g);letter-spacing:3px;}
+.logo em{color:var(--c);font-style:normal;}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--g);animation:pulse 1.4s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.live-label{font-family:var(--body);font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--gd);}
+.clock{font-size:11px;color:var(--txt2);}
+.agent{display:flex;align-items:center;gap:7px;background:var(--gf);border:1px solid var(--bd);border-radius:2px;padding:3px 9px;}
+.agent-av{width:24px;height:24px;border-radius:50%;background:var(--gdk);border:1px solid var(--g);display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-size:8px;color:var(--g);}
+.agent-n{font-family:var(--body);font-size:11px;font-weight:700;letter-spacing:1px;color:var(--gd);}
+
+/* MAIN NAV */
+.mainnav{background:var(--bg2);border-bottom:1px solid var(--bd);display:flex;overflow-x:auto;position:relative;z-index:2;}
+.mainnav::-webkit-scrollbar{height:2px;}
+.mainnav::-webkit-scrollbar-thumb{background:var(--gdk);}
+.mnb{padding:7px 12px;font-family:var(--body);font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--txt2);background:none;border:none;border-right:1px solid var(--bd);cursor:pointer;white-space:nowrap;outline:none;transition:all .12s;}
+.mnb:hover{color:var(--g);background:var(--gf);}
+.mnb.active{color:var(--bg);background:var(--g);}
+
+/* PANELS */
+.panel{display:none;padding:14px;position:relative;z-index:1;}
+.panel.active{display:block;}
+
+/* METRIC STRIP */
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:14px;}
+.metric{background:var(--bg3);border:1px solid var(--bd);border-radius:2px;padding:8px 10px;}
+.metric-label{font-family:var(--body);font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--txt2);text-transform:uppercase;margin-bottom:3px;}
+.metric-val{font-family:var(--disp);font-size:18px;font-weight:700;color:var(--g);}
+.metric-val.amber{color:var(--a);}
+.metric-val.red{color:var(--r);}
+.metric-val.cyan{color:var(--c);}
+.metric-sub{font-size:10px;color:var(--txt2);font-family:var(--body);margin-top:1px;}
+
+/* SECTION */
+.sec-title{font-family:var(--disp);font-size:10px;letter-spacing:3px;color:var(--txt2);margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--bd);}
+
+/* OBJECTIVE CARDS */
+.obj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-bottom:14px;}
+.obj-card{background:var(--bg3);border:1px solid var(--bd);border-radius:2px;padding:10px 12px;cursor:pointer;transition:all .14s;position:relative;overflow:hidden;}
+.obj-card:hover{border-color:var(--g);background:var(--gf);}
+.obj-card.active-obj{border-color:var(--g);background:var(--gf);}
+.obj-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--accent,var(--g));}
+.obj-num{font-family:var(--disp);font-size:9px;letter-spacing:2px;color:var(--txt2);margin-bottom:3px;}
+.obj-name{font-family:var(--body);font-size:13px;font-weight:700;color:var(--txt);margin-bottom:3px;}
+.obj-stat{font-size:10px;color:var(--txt2);font-family:var(--body);}
+.obj-badge{display:inline-block;padding:1px 6px;border-radius:2px;font-size:9px;font-family:var(--body);font-weight:700;letter-spacing:1px;margin-top:4px;}
+.badge-ok{background:var(--gf);color:var(--g);border:1px solid var(--bd);}
+.badge-run{background:var(--af);color:var(--a);border:1px solid #ffaa0040;}
+.badge-crit{background:var(--rf);color:var(--r);border:1px solid #ff3c5a40;}
+.badge-info{background:var(--cf);color:var(--c);border:1px solid #00d4ff40;}
+
+/* DETAIL PANE */
+.detail-pane{background:var(--bg3);border:1px solid var(--bd);border-radius:2px;padding:12px 14px;margin-bottom:14px;min-height:80px;}
+.detail-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.detail-icon{width:32px;height:32px;border-radius:2px;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:14px;}
+.detail-title{font-family:var(--disp);font-size:12px;font-weight:700;color:var(--g);}
+.detail-sub{font-size:10px;color:var(--txt2);font-family:var(--body);letter-spacing:1px;}
+.detail-body{font-family:var(--body);font-size:13px;color:var(--txt);line-height:1.7;}
+.detail-cmds{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;}
+.dcmd{background:var(--bg4);border:1px solid var(--bd);border-radius:2px;padding:3px 8px;font-size:11px;color:var(--g);font-family:var(--mono);cursor:pointer;}
+.dcmd:hover{border-color:var(--g);color:var(--c);}
+
+/* TERMINAL */
+.terminal{background:var(--bg);border:1px solid var(--bd);border-radius:2px;min-height:160px;max-height:260px;overflow-y:auto;padding:10px 12px;font-size:11px;line-height:1.8;margin-bottom:10px;}
+.terminal::-webkit-scrollbar{width:3px;}
+.terminal::-webkit-scrollbar-thumb{background:var(--gdk);}
+.t-g{color:var(--g);} .t-d{color:var(--txt2);} .t-a{color:var(--a);} .t-r{color:var(--r);} .t-c{color:var(--c);} .t-w{color:var(--txt);}
+.t-ln{display:block;}
+.blink{animation:blink 1s step-end infinite;}
+@keyframes blink{50%{opacity:0;}}
+.inp-row{display:flex;gap:7px;}
+.cmd-inp{flex:1;background:var(--bg2);border:1px solid var(--bd);color:var(--g);font-family:var(--mono);font-size:11px;padding:7px 10px;border-radius:2px;outline:none;}
+.cmd-inp:focus{border-color:var(--g);}
+.cmd-inp::placeholder{color:#1a4030;}
+.run-btn{background:var(--g);color:var(--bg);border:none;font-family:var(--disp);font-size:10px;font-weight:700;letter-spacing:2px;padding:0 14px;border-radius:2px;cursor:pointer;transition:all .13s;}
+.run-btn:hover{background:var(--gd);}
+.sec-btn{background:var(--bg2);color:var(--g);border:1px solid var(--bd);font-family:var(--disp);font-size:10px;font-weight:700;letter-spacing:1px;padding:6px 12px;border-radius:2px;cursor:pointer;transition:all .13s;}
+.sec-btn:hover{border-color:var(--g);background:var(--gf);}
+
+/* MONITOR FEED */
+.feed{background:var(--bg);border:1px solid var(--bd);border-radius:2px;max-height:220px;overflow-y:auto;margin-bottom:12px;}
+.feed::-webkit-scrollbar{width:3px;}
+.feed::-webkit-scrollbar-thumb{background:var(--gdk);}
+.feed-row{display:grid;grid-template-columns:80px 90px 1fr 80px 60px;gap:6px;padding:5px 10px;border-bottom:1px solid #0d1e14;align-items:center;font-size:11px;}
+.feed-row:hover{background:var(--gf);}
+.feed-hdr{background:var(--bg3);font-family:var(--body);font-size:10px;font-weight:700;letter-spacing:1px;color:var(--txt2);text-transform:uppercase;border-bottom:1px solid var(--bd);}
+.feed-ip{color:var(--c);font-family:var(--mono);}
+.feed-port{color:var(--a);}
+.feed-svc{color:var(--txt);}
+.feed-state-o{color:var(--g);}
+.feed-state-f{color:var(--r);}
+.feed-state-c{color:var(--txt2);}
+.pulse-row{animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0;background:var(--gf);}to{opacity:1;}}
+
+/* CHART AREA */
+.chart-wrap{position:relative;width:100%;height:180px;margin-bottom:12px;}
+
+/* REPORT */
+.report-section{background:var(--bg3);border:1px solid var(--bd);border-radius:2px;padding:12px;margin-bottom:10px;}
+.report-hdr{font-family:var(--disp);font-size:10px;letter-spacing:2px;color:var(--g);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.sev-bar{display:flex;gap:4px;margin-bottom:8px;}
+.sev-seg{height:12px;border-radius:1px;display:flex;align-items:center;justify-content:center;font-size:9px;font-family:var(--body);font-weight:700;}
+.finding{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid #0d1e14;font-size:12px;font-family:var(--body);}
+.finding:last-child{border-bottom:none;}
+.finding-sev{width:50px;flex-shrink:0;text-align:center;padding:1px 4px;border-radius:2px;font-size:10px;font-weight:700;}
+.sev-crit{background:var(--rf);color:var(--r);}
+.sev-high{background:var(--af);color:var(--a);}
+.sev-med{background:var(--cf);color:var(--c);}
+.sev-low{background:var(--gf);color:var(--g);}
+.finding-title{color:var(--txt);flex:1;}
+.finding-port{color:var(--txt2);width:60px;text-align:right;font-family:var(--mono);font-size:10px;}
+
+/* PUJA BLOCK */
+.puja{background:var(--bg2);border:1px solid var(--bd);border-radius:2px;padding:10px 12px;margin-bottom:12px;display:flex;gap:10px;align-items:flex-start;}
+.puja-av{width:32px;height:32px;flex-shrink:0;border-radius:50%;border:1.5px solid var(--g);background:var(--gdk);display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-size:10px;color:var(--g);}
+.puja-txt{font-family:var(--body);font-size:12px;color:var(--txt);line-height:1.6;}
+.puja-nm{font-size:10px;color:var(--g);font-family:var(--disp);font-weight:700;letter-spacing:1px;margin-bottom:3px;}
+
+/* PROGRESS */
+.obj-progress{margin-bottom:12px;}
+.prg-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.prg-label{font-family:var(--body);font-size:11px;color:var(--txt2);width:160px;flex-shrink:0;}
+.prg-bar{flex:1;height:3px;background:var(--bg4);border-radius:2px;overflow:hidden;}
+.prg-fill{height:100%;border-radius:2px;transition:width .6s ease;}
+.prg-val{font-size:10px;color:var(--g);font-family:var(--mono);width:30px;text-align:right;}
+
+/* QUIZ */
+.quiz-q{color:var(--c);font-size:13px;margin-bottom:10px;font-family:var(--body);font-weight:500;line-height:1.5;}
+.quiz-opts{display:flex;flex-direction:column;gap:6px;}
+.qopt{background:var(--bg);border:1px solid #1a4030;border-radius:2px;padding:7px 11px;font-size:11px;color:var(--txt);cursor:pointer;text-align:left;font-family:var(--mono);outline:none;transition:all .12s;}
+.qopt:hover{border-color:var(--g);color:var(--g);}
+.qopt.correct{border-color:var(--g);background:var(--gf);color:var(--g);}
+.qopt.wrong{border-color:var(--r);background:var(--rf);color:var(--r);}
+.score-strip{display:flex;gap:16px;margin-bottom:12px;}
+.sc-item{font-family:var(--body);font-size:12px;color:var(--txt2);}
+.sc-val{font-family:var(--disp);font-size:16px;color:var(--g);margin-left:4px;}
+</style>
+
+<div class="app">
+<div class="scanline"></div>
+
+<div class="topbar">
+  <div>
+    <div class="logo">NMAP <em>MASTER</em></div>
+    <div style="font-size:9px;color:var(--txt2);font-family:var(--body);letter-spacing:2px;margin-top:1px;">OSINT SECURITY ASSESSMENT PLATFORM v5.0</div>
+  </div>
+  <div class="topbar-right">
+    <div style="display:flex;align-items:center;gap:5px;"><div class="live-dot"></div><div class="live-label">LIVE</div></div>
+    <div class="clock" id="clock">--:--:--</div>
+    <div class="agent">
+      <div class="puja-av">PK</div>
+      <div class="agent-n">PUJA KUMARI</div>
+    </div>
+  </div>
+</div>
+
+<div class="mainnav">
+  <button class="mnb active" onclick="sw('dash',this)">DASHBOARD</button>
+  <button class="mnb" onclick="sw('terminal',this)">TERMINAL</button>
+  <button class="mnb" onclick="sw('monitor',this)">MONITOR</button>
+  <button class="mnb" onclick="sw('report',this)">REPORT</button>
+  <button class="mnb" onclick="sw('quiz',this)">QUIZ</button>
+</div>
+
+<!-- ═══ DASHBOARD ═══ -->
+<div id="dash" class="panel active">
+
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">Hosts Found</div><div class="metric-val" id="m-hosts">0</div><div class="metric-sub">live on subnet</div></div>
+    <div class="metric"><div class="metric-label">Open Ports</div><div class="metric-val cyan" id="m-ports">0</div><div class="metric-sub">across all targets</div></div>
+    <div class="metric"><div class="metric-label">Services</div><div class="metric-val" id="m-svcs">0</div><div class="metric-sub">detected &amp; versioned</div></div>
+    <div class="metric"><div class="metric-label">Vulns</div><div class="metric-val red" id="m-vulns">0</div><div class="metric-sub">CVEs mapped</div></div>
+    <div class="metric"><div class="metric-label">OS Types</div><div class="metric-val amber" id="m-os">0</div><div class="metric-sub">fingerprinted</div></div>
+    <div class="metric"><div class="metric-label">OSINT Hits</div><div class="metric-val cyan" id="m-osint">0</div><div class="metric-sub">data points</div></div>
+  </div>
+
+  <div class="sec-title">OBJECTIVES — 13 ACTIVE MODULES</div>
+
+  <div class="obj-grid" id="obj-grid"></div>
+
+  <div class="detail-pane" id="detail-pane">
+    <div style="color:var(--txt2);font-family:var(--body);font-size:12px;">Click an objective card above to view details, commands, and status.</div>
+  </div>
+
+  <div class="sec-title">OBJECTIVE PROGRESS</div>
+  <div class="obj-progress" id="obj-progress"></div>
+
+  <div class="sec-title">PORT DISTRIBUTION</div>
+  <div class="chart-wrap"><canvas id="portChart" role="img" aria-label="Bar chart showing open port counts by common service">Port scan results by service.</canvas></div>
+
+  <div class="sec-title">VULNERABILITY SEVERITY</div>
+  <div class="chart-wrap" style="height:140px;"><canvas id="vulnChart" role="img" aria-label="Doughnut chart of vulnerability severity breakdown">Vulnerability severity breakdown.</canvas></div>
+
+</div>
+
+<!-- ═══ TERMINAL ═══ -->
+<div id="terminal" class="panel">
+  <div class="puja">
+    <div class="puja-av">PK</div>
+    <div><div class="puja-nm">PUJA KUMARI</div><div class="puja-txt">Type any nmap command or click a quick-scan preset. I'll explain every result in real time.</div></div>
+  </div>
+
+  <div class="sec-title">QUICK PRESETS</div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+    <button class="sec-btn" onclick="runScan('nmap -sn 192.168.1.0/24')">Ping Sweep</button>
+    <button class="sec-btn" onclick="runScan('nmap -sS -p 1-1024 192.168.1.1')">SYN Scan</button>
+    <button class="sec-btn" onclick="runScan('nmap -sV -sC 192.168.1.1')">Service Detect</button>
+    <button class="sec-btn" onclick="runScan('nmap -A -T4 192.168.1.1')">Full Aggressive</button>
+    <button class="sec-btn" onclick="runScan('nmap -O 192.168.1.1')">OS Detect</button>
+    <button class="sec-btn" onclick="runScan('nmap --script vuln 192.168.1.1')">Vuln Scan</button>
+    <button class="sec-btn" onclick="runScan('nmap -sU -p 53,161,500 192.168.1.1')">UDP Scan</button>
+    <button class="sec-btn" onclick="runScan('nmap --script ssl-cert,dns-brute 192.168.1.1')">OSINT Scripts</button>
+    <button class="sec-btn" onclick="runScan('nmap -p- --open -T4 192.168.1.1')">All Ports</button>
+  </div>
+
+  <div class="terminal" id="main-term">
+    <span class="t-ln t-d">// NMAP MASTER — interactive terminal simulation</span>
+    <span class="t-ln t-g">puja@nmapmaster:~$ <span class="blink">_</span></span>
+  </div>
+  <div class="inp-row">
+    <input class="cmd-inp" id="cmd-inp" placeholder="nmap [flags] [target]" onkeydown="if(event.key==='Enter')execCmd()"/>
+    <button class="run-btn" onclick="execCmd()">RUN</button>
+  </div>
+</div>
+
+<!-- ═══ MONITOR ═══ -->
+<div id="monitor" class="panel">
+  <div class="puja">
+    <div class="puja-av">PK</div>
+    <div><div class="puja-nm">PUJA KUMARI // REAL-TIME MONITOR</div><div class="puja-txt">Live feed of discovered hosts and ports. New entries stream in as the scan progresses. Watch for anomalous services.</div></div>
+  </div>
+
+  <div class="metrics" style="margin-bottom:12px;">
+    <div class="metric"><div class="metric-label">Scan Rate</div><div class="metric-val" id="rt-rate">0</div><div class="metric-sub">pkts/sec</div></div>
+    <div class="metric"><div class="metric-label">Discovered</div><div class="metric-val cyan" id="rt-disc">0</div><div class="metric-sub">hosts</div></div>
+    <div class="metric"><div class="metric-label">Elapsed</div><div class="metric-val amber" id="rt-time">0s</div><div class="metric-sub">scan time</div></div>
+    <div class="metric"><div class="metric-label">Alerts</div><div class="metric-val red" id="rt-alerts">0</div><div class="metric-sub">anomalies</div></div>
+  </div>
+
+  <div style="display:flex;gap:8px;margin-bottom:10px;">
+    <button class="run-btn" id="mon-start" onclick="startMonitor()">START SCAN</button>
+    <button class="sec-btn" id="mon-stop" onclick="stopMonitor()">STOP</button>
+    <button class="sec-btn" onclick="clearFeed()">CLEAR</button>
+  </div>
+
+  <div class="sec-title">LIVE DISCOVERY FEED</div>
+  <div class="feed" id="live-feed">
+    <div class="feed-row feed-hdr">
+      <span>IP</span><span>PORT</span><span>SERVICE</span><span>STATE</span><span>RISK</span>
+    </div>
+  </div>
+
+  <div class="sec-title">NETWORK MAP — DISCOVERY TIMELINE</div>
+  <div class="chart-wrap" style="height:160px;"><canvas id="timeChart" role="img" aria-label="Line chart showing hosts and ports discovered over time">Discovery timeline.</canvas></div>
+</div>
+
+<!-- ═══ REPORT ═══ -->
+<div id="report" class="panel">
+  <div class="puja">
+    <div class="puja-av">PK</div>
+    <div><div class="puja-nm">PUJA KUMARI // REPORT GENERATION</div><div class="puja-txt">Auto-generated security assessment report. Every finding mapped to CVSS score and remediation priority.</div></div>
+  </div>
+
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">Critical</div><div class="metric-val red">3</div></div>
+    <div class="metric"><div class="metric-label">High</div><div class="metric-val amber">5</div></div>
+    <div class="metric"><div class="metric-label">Medium</div><div class="metric-val cyan">7</div></div>
+    <div class="metric"><div class="metric-label">Low</div><div class="metric-val">4</div></div>
+    <div class="metric"><div class="metric-label">Info</div><div class="metric-val" style="color:var(--txt2)">9</div></div>
+  </div>
+
+  <div class="report-section">
+    <div class="report-hdr">SEVERITY DISTRIBUTION</div>
+    <div class="sev-bar">
+      <div class="sev-seg" style="width:12%;background:var(--rf);color:var(--r);">CRIT</div>
+      <div class="sev-seg" style="width:20%;background:var(--af);color:var(--a);">HIGH</div>
+      <div class="sev-seg" style="width:28%;background:var(--cf);color:var(--c);">MED</div>
+      <div class="sev-seg" style="width:16%;background:var(--gf);color:var(--g);">LOW</div>
+      <div class="sev-seg" style="width:24%;background:var(--bg4);color:var(--txt2);">INFO</div>
+    </div>
+  </div>
+
+  <div class="report-section">
+    <div class="report-hdr">CRITICAL FINDINGS</div>
+    <div class="finding"><span class="finding-sev sev-crit">CRIT</span><span class="finding-title">CVE-2017-5638 Apache Struts RCE — remote code execution via multipart parser</span><span class="finding-port">8080/tcp</span></div>
+    <div class="finding"><span class="finding-sev sev-crit">CRIT</span><span class="finding-title">CVE-2021-4034 Polkit pkexec local privilege escalation</span><span class="finding-port">local</span></div>
+    <div class="finding"><span class="finding-sev sev-crit">CRIT</span><span class="finding-title">MongoDB exposed without authentication — full DB read/write</span><span class="finding-port">27017/tcp</span></div>
+  </div>
+
+  <div class="report-section">
+    <div class="report-hdr">HIGH SEVERITY</div>
+    <div class="finding"><span class="finding-sev sev-high">HIGH</span><span class="finding-title">OpenSSH 7.2p2 — CVE-2016-6515 DoS via crafted password</span><span class="finding-port">22/tcp</span></div>
+    <div class="finding"><span class="finding-sev sev-high">HIGH</span><span class="finding-title">FTP anonymous login enabled — full file system traversal</span><span class="finding-port">21/tcp</span></div>
+    <div class="finding"><span class="finding-sev sev-high">HIGH</span><span class="finding-title">SNMP community string "public" — system info exposed</span><span class="finding-port">161/udp</span></div>
+    <div class="finding"><span class="finding-sev sev-high">HIGH</span><span class="finding-title">SSLv3 POODLE — CBC padding oracle attack possible</span><span class="finding-port">443/tcp</span></div>
+    <div class="finding"><span class="finding-sev sev-high">HIGH</span><span class="finding-title">Telnet service active — credentials transmitted in cleartext</span><span class="finding-port">23/tcp</span></div>
+  </div>
+
+  <div class="report-section">
+    <div class="report-hdr">MEDIUM FINDINGS</div>
+    <div class="finding"><span class="finding-sev sev-med">MED</span><span class="finding-title">Apache 2.4.41 — multiple CVEs, update to 2.4.57+</span><span class="finding-port">80/tcp</span></div>
+    <div class="finding"><span class="finding-sev sev-med">MED</span><span class="finding-title">SSL certificate expires in 23 days</span><span class="finding-port">443/tcp</span></div>
+    <div class="finding"><span class="finding-sev sev-med">MED</span><span class="finding-title">DNS zone transfer allowed — full subdomain enumeration</span><span class="finding-port">53/tcp</span></div>
+    <div class="finding"><span class="finding-sev sev-med">MED</span><span class="finding-title">MySQL 5.7 root without password on localhost</span><span class="finding-port">3306/tcp</span></div>
+  </div>
+
+  <div style="display:flex;gap:8px;margin-top:10px;">
+    <button class="run-btn" onclick="sendPrompt('Generate a full pentest report for these NMAP MASTER findings with remediation steps for each vulnerability')">Generate Full Report ↗</button>
+    <button class="sec-btn" onclick="sendPrompt('Explain how to remediate the critical CVE-2017-5638 Apache Struts vulnerability found on port 8080')">Fix Critical Vulns ↗</button>
+  </div>
+</div>
+
+<!-- ═══ QUIZ ═══ -->
+<div id="quiz" class="panel">
+  <div class="puja">
+    <div class="puja-av">PK</div>
+    <div><div class="puja-nm">PUJA KUMARI // KNOWLEDGE CHECK</div><div class="puja-txt" id="puja-q-msg">13 objectives, 13 disciplines. Let's verify you know all of them.</div></div>
+  </div>
+  <div class="score-strip">
+    <div class="sc-item">Score<span class="sc-val" id="qscore">0/0</span></div>
+    <div class="sc-item">Accuracy<span class="sc-val" id="qacc">--%</span></div>
+    <div class="sc-item">Streak<span class="sc-val" id="qstreak">0</span></div>
+  </div>
+  <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:2px;padding:12px;margin-bottom:10px;">
+    <div class="quiz-q" id="qtext">Loading...</div>
+    <div class="quiz-opts" id="qopts"></div>
+  </div>
+  <div style="display:flex;gap:8px;">
+    <button class="run-btn" id="qnext" onclick="nextQ()" style="display:none;">NEXT</button>
+    <button class="sec-btn" onclick="resetQ()">RESTART</button>
+  </div>
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+
+function updateClock(){
+  const n=new Date();
+  $('clock').textContent=n.toTimeString().slice(0,8);
+}
+setInterval(updateClock,1000); updateClock();
+
+const OBJECTIVES = [
+  {id:'01',name:'Network Discovery',icon:'◈',accent:'#00ff9f',desc:'Identify all live hosts on a target subnet using ICMP, ARP, and TCP probes.',cmds:['nmap -sn 192.168.1.0/24','nmap -sn --send-ip 10.0.0.0/24','nmap -PS22,80,443 192.168.1.0/24'],badge:'ACTIVE',badgeClass:'badge-run',progress:78},
+  {id:'02',name:'Port Scanning',icon:'▣',accent:'#00d4ff',desc:'Enumerate open, closed, and filtered TCP/UDP ports across discovered hosts.',cmds:['nmap -sS -p 1-65535 192.168.1.1','nmap -sT -p 80,443,22 192.168.1.1','nmap -p- --open 192.168.1.0/24'],badge:'ACTIVE',badgeClass:'badge-run',progress:91},
+  {id:'03',name:'Service Detection',icon:'◉',accent:'#00ff9f',desc:'Identify applications running on open ports — HTTP, SSH, FTP, MySQL, etc.',cmds:['nmap -sV 192.168.1.1','nmap -sV --version-intensity 9 192.168.1.1','nmap --script banner 192.168.1.1'],badge:'DONE',badgeClass:'badge-ok',progress:100},
+  {id:'04',name:'Version Detection',icon:'◎',accent:'#ffaa00',desc:'Determine exact software versions to map against CVE databases.',cmds:['nmap -sV --version-all 192.168.1.1','nmap -sV -p 22,80,443 192.168.1.1','nmap -A 192.168.1.1'],badge:'DONE',badgeClass:'badge-ok',progress:100},
+  {id:'05',name:'OS Detection',icon:'◆',accent:'#b94fff',desc:'Fingerprint target operating systems via TCP/IP stack behavior analysis.',cmds:['nmap -O 192.168.1.1','nmap -O --osscan-guess 192.168.1.1','nmap -A 192.168.1.1'],badge:'ACTIVE',badgeClass:'badge-run',progress:65},
+  {id:'06',name:'Vulnerability Scanning',icon:'◈',accent:'#ff3c5a',desc:'Map detected service versions to known CVEs using NSE vuln scripts.',cmds:['nmap --script vuln 192.168.1.1','nmap --script exploit 192.168.1.1','nmap --script=vulscan/vulscan.nse 192.168.1.1'],badge:'CRIT',badgeClass:'badge-crit',progress:55},
+  {id:'07',name:'OSINT Collection',icon:'◐',accent:'#00d4ff',desc:'Gather intelligence passively — DNS, WHOIS, SSL certs, banners, HTTP headers.',cmds:['nmap --script dns-brute target.com','nmap --script whois-domain target.com','nmap --script ssl-cert -p 443 target.com'],badge:'ACTIVE',badgeClass:'badge-run',progress:82},
+  {id:'08',name:'Scan Automation',icon:'◑',accent:'#ffaa00',desc:'Script and schedule recurring scans, output to files for pipeline processing.',cmds:['nmap -iL targets.txt -oA scan_$(date +%F)','nmap -sV --script=default -oX report.xml','nmap --resume scan.log'],badge:'INFO',badgeClass:'badge-info',progress:40},
+  {id:'09',name:'Result Visualization',icon:'◈',accent:'#00ff9f',desc:'Parse nmap XML output into graphs, heatmaps, and network topology maps.',cmds:['nmap -oX scan.xml 192.168.1.0/24','xsltproc scan.xml -o report.html','nmap -oG - | grep open'],badge:'INFO',badgeClass:'badge-info',progress:70},
+  {id:'10',name:'Report Generation',icon:'◎',accent:'#b94fff',desc:'Produce structured pentest reports with CVSS scores, evidence, and remediation.',cmds:['nmap -oA full_report 192.168.1.0/24','nmap --stylesheet nmap.xsl -oX findings.xml','nmap -oN findings.txt --open 192.168.1.0/24'],badge:'ACTIVE',badgeClass:'badge-run',progress:60},
+  {id:'11',name:'Security Assessment',icon:'◆',accent:'#ff3c5a',desc:'Full-scope assessment: recon → enumeration → exploitation prep → reporting.',cmds:['nmap -sV --script=default,vuln 192.168.1.0/24','nmap -A -T4 --script=auth,brute 192.168.1.1','nmap --script smb-vuln-* 192.168.1.1'],badge:'CRIT',badgeClass:'badge-crit',progress:48},
+  {id:'12',name:'UI Design',icon:'◉',accent:'#00d4ff',desc:'Dashboard and visualization design for presenting scan results to stakeholders.',cmds:['nmap -oX scan.xml && python3 nmap_parse.py','nmap2csv scan.xml > results.csv','xsltproc --novalid scan.xml -o dashboard.html'],badge:'DONE',badgeClass:'badge-ok',progress:100},
+  {id:'13',name:'Real-Time Monitoring',icon:'◈',accent:'#00ff9f',desc:'Continuous scan loops, live feed display, and anomaly alerting on new ports.',cmds:['watch -n 60 nmap -sn 192.168.1.0/24','nmap -sS --open -oG - 192.168.1.0/24 | grep open','nmap -T4 -F 192.168.1.0/24 --open'],badge:'LIVE',badgeClass:'badge-run',progress:88},
+];
+
+function renderObjectives(){
+  const grid = $('obj-grid');
+  const prg = $('obj-progress');
+  grid.innerHTML=''; prg.innerHTML='';
+  OBJECTIVES.forEach((o,i)=>{
+    const c=document.createElement('div');
+    c.className='obj-card'; c.style.setProperty('--accent',o.accent);
+    c.innerHTML=`<div class="obj-num">OBJ ${o.id}</div><div class="obj-name">${o.icon} ${o.name}</div><div class="obj-stat">${o.progress}% complete</div><div class="obj-badge ${o.badgeClass}">${o.badge}</div>`;
+    c.onclick=()=>showDetail(i,c);
+    grid.appendChild(c);
+
+    const r=document.createElement('div'); r.className='prg-row';
+    r.innerHTML=`<div class="prg-label">${o.name}</div><div class="prg-bar"><div class="prg-fill" style="width:${o.progress}%;background:${o.accent};"></div></div><div class="prg-val">${o.progress}%</div>`;
+    prg.appendChild(r);
+  });
+}
+
+function showDetail(i,card){
+  document.querySelectorAll('.obj-card').forEach(c=>c.classList.remove('active-obj'));
+  card.classList.add('active-obj');
+  const o=OBJECTIVES[i];
+  const cmds=o.cmds.map(c=>`<span class="dcmd" onclick="injectCmd('${c}')">${c}</span>`).join('');
+  $('detail-pane').innerHTML=`
+    <div class="detail-head">
+      <div class="detail-icon" style="border-color:${o.accent};color:${o.accent};">${o.icon}</div>
+      <div><div class="detail-title">OBJ ${o.id} — ${o.name.toUpperCase()}</div><div class="detail-sub">${o.progress}% COMPLETE • STATUS: ${o.badge}</div></div>
+    </div>
+    <div class="detail-body">${o.desc}</div>
+    <div class="detail-cmds">${cmds}</div>
+  `;
+}
+
+function injectCmd(c){
+  $('cmd-inp').value=c;
+  sw('terminal',document.querySelectorAll('.mnb')[1]);
+}
+
+function animateMetrics(){
+  const targets={hosts:14,ports:87,svcs:23,os:5,vulns:12,osint:41};
+  let step=0; const steps=40;
+  const iv=setInterval(()=>{
+    step++;
+    $('m-hosts').textContent=Math.round(targets.hosts*step/steps);
+    $('m-ports').textContent=Math.round(targets.ports*step/steps);
+    $('m-svcs').textContent=Math.round(targets.svcs*step/steps);
+    $('m-os').textContent=Math.round(targets.os*step/steps);
+    $('m-vulns').textContent=Math.round(targets.vulns*step/steps);
+    $('m-osint').textContent=Math.round(targets.osint*step/steps);
+    if(step>=steps)clearInterval(iv);
+  },35);
+}
+
+function buildCharts(){
+  const portCtx=$('portChart').getContext('2d');
+  new Chart(portCtx,{type:'bar',data:{
+    labels:['SSH 22','HTTP 80','HTTPS 443','FTP 21','SMTP 25','SMB 445','MySQL 3306','RDP 3389','SNMP 161','Mongo 27017'],
+    datasets:[{label:'Hosts with port open',data:[14,11,9,4,3,8,5,6,2,1],backgroundColor:'#00ff9f40',borderColor:'#00ff9f',borderWidth:1}]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5a8a6a',font:{size:9},maxRotation:45,autoSkip:false},grid:{color:'#0d1e14'}},y:{ticks:{color:'#5a8a6a',font:{size:9}},grid:{color:'#0d1e14'}}}}});
+
+  const vulnCtx=$('vulnChart').getContext('2d');
+  new Chart(vulnCtx,{type:'doughnut',data:{
+    labels:['Critical 3','High 5','Medium 7','Low 4','Info 9'],
+    datasets:[{data:[3,5,7,4,9],backgroundColor:['#ff3c5a40','#ffaa0040','#00d4ff40','#00ff9f40','#5a8a6a40'],borderColor:['#ff3c5a','#ffaa00','#00d4ff','#00ff9f','#5a8a6a'],borderWidth:1}]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'65%'}});
+}
+
+const SIMS={
+  '-sn':[['d','Starting Nmap 7.94 host discovery...'],['g','192.168.1.1 — up (0.0009s) [gateway]'],['g','192.168.1.10 — up (0.0014s) [workstation]'],['g','192.168.1.25 — up (0.0031s) [server]'],['a','192.168.1.50 — up (0.0087s) [unknown device]'],['d','4 hosts up | 252 down | scanned in 2.48s'],['c','[PK] 4 live hosts. Workstation + server = priority targets. Unknown device on .50 — investigate.']],
+  '-sS':[['d','SYN stealth scan — requires root...'],['g','22/tcp   open   ssh'],['g','80/tcp   open   http'],['g','443/tcp  open   https'],['a','3389/tcp filtered ms-wbt-server'],['r','21/tcp   closed ftp'],['d','Done in 0.43s'],['c','[PK] RDP filtered = firewall rule. FTP closed but listen for it in config files. SYN = no app logs.']],
+  '-sV':[['d','Version detection scan...'],['g','22/tcp  open  ssh    OpenSSH 8.2p1 Ubuntu'],['g','80/tcp  open  http   nginx 1.18.0'],['a','3306/tcp open mysql  MySQL 5.7.40-log'],['r','8080/tcp open http  Apache Tomcat 9.0.50'],['d','Service Info: OS Linux; CPE cpe:/o:linux:linux_kernel'],['c','[PK] Tomcat 9.0.50 = CVE-2020-1938 Ghostcat CRITICAL. MySQL 5.7 EOL. Patch now.']],
+  '-O':[['d','OS detection — TTL and TCP fingerprinting...'],['g','Device type: general purpose'],['g','Running: Linux 5.X'],['g','OS CPE: cpe:/o:linux:linux_kernel:5'],['g','OS details: Linux 5.4 - 5.11'],['a','Network Distance: 2 hops'],['c','[PK] Linux 5.4 kernel — check for CVE-2022-0847 (Dirty Pipe). Distance of 2 hops = not on same VLAN.']],
+  '-A':[['d','Aggressive scan: -sV -O -sC + traceroute...'],['c','[OS]'],['g','Linux 5.4 - 5.11 (96% confidence)'],['c','[Version]'],['g','22/tcp ssh OpenSSH 8.2p1'],['g','80/tcp http nginx 1.18.0'],['c','[Scripts]'],['w','http-title: Login -- Powered by PHPMyAdmin'],['w','ssh-hostkey: 2048 RSA SHA256:Xv3...'],['c','[Traceroute]'],['d','HOP 1: 192.168.1.254 | HOP 2: 192.168.1.1'],['c','[PK] PHPMyAdmin exposed on port 80! Try default creds: root/root, root/toor, admin/admin.']],
+  'vuln':[['d','Running NSE vuln scripts — this may take time...'],['r','VULNERABLE: CVE-2017-5638 Apache Struts RCE (CVSS 10.0)'],['r','VULNERABLE: CVE-2014-3566 SSLv3 POODLE'],['a','LIKELY VULNERABLE: CVE-2021-23017 nginx resolver SSRF'],['g','NOT vulnerable: CVE-2021-41773 Apache path traversal'],['d','Vuln scan complete.'],['c','[PK] Struts RCE is full game over. Report as P1. Document with curl PoC before patching window.']],
+  'ssl-cert':[['d','NSE: ssl-cert on port 443...'],['g','CN=*.target.com'],['g','SAN: target.com, api.target.com, internal.target.com, dev.target.com'],['a','Issuer: Let\'s Encrypt'],['a','Expires: 2024-08-15 (23 days!)'],['g','Key: RSA 2048-bit'],['c','[PK] SAN reveals internal.target.com and dev.target.com — hidden assets. Cert expiry = add to report.']],
+  'dns-brute':[['d','NSE: dns-brute subdomain enumeration...'],['g','ns1.target.com → 203.0.113.10'],['g','mail.target.com → 203.0.113.50'],['a','staging.target.com → 203.0.113.99'],['r','admin.target.com → 203.0.113.101'],['r','dev.target.com → 10.0.0.15 (INTERNAL IP LEAKED)'],['c','[PK] dev.target.com on internal IP = misconfigured split-horizon DNS. admin.target.com = high value.']],
+};
+
+function getSimLines(cmd){
+  for(const [k,v] of Object.entries(SIMS)) if(cmd.includes(k)) return v;
+  return [['d','Executing: '+cmd],['g','22/tcp open ssh'],['g','80/tcp open http'],['a','8080/tcp open http-alt'],['d','Done in 1.23s'],['c','[PK] Click a preset for a detailed simulation!']];
+}
+
+const tColors={g:'t-g',d:'t-d',a:'t-a',r:'t-r',c:'t-c',w:'t-w'};
+function runScan(cmd){
+  window._lc=cmd; $('cmd-inp').value=cmd;
+  sw('terminal',document.querySelectorAll('.mnb')[1]);
+  const t=$('main-term'); t.innerHTML='';
+  const h=document.createElement('span'); h.className='t-ln t-g'; h.textContent='puja@nmapmaster:~$ '+cmd; t.appendChild(h);
+  const lines=getSimLines(cmd); let i=0;
+  function nl(){
+    if(i>=lines.length){const c=document.createElement('span');c.className='t-ln t-g';c.innerHTML='puja@nmapmaster:~$ <span class="blink">_</span>';t.appendChild(c);return;}
+    const [col,txt]=lines[i++]; const s=document.createElement('span'); s.className='t-ln '+(tColors[col]||'t-d'); s.textContent=txt; t.appendChild(s); t.scrollTop=t.scrollHeight; setTimeout(nl,70+Math.random()*50);
+  }
+  setTimeout(nl,200);
+}
+function execCmd(){const c=$('cmd-inp').value.trim(); if(c) runScan(c);}
+
+const FEED_DATA=[
+  ['192.168.1.1','80/tcp','http (nginx 1.18)','OPEN','LOW'],
+  ['192.168.1.1','443/tcp','https (nginx)','OPEN','LOW'],
+  ['192.168.1.1','22/tcp','ssh (OpenSSH 8.2)','OPEN','MED'],
+  ['192.168.1.10','3306/tcp','mysql 5.7.40','OPEN','HIGH'],
+  ['192.168.1.10','8080/tcp','Tomcat 9.0.50','OPEN','CRIT'],
+  ['192.168.1.25','21/tcp','ftp ProFTPD 1.3','OPEN','HIGH'],
+  ['192.168.1.25','23/tcp','telnet','OPEN','CRIT'],
+  ['192.168.1.25','161/udp','snmp public','OPEN','HIGH'],
+  ['192.168.1.50','27017/tcp','MongoDB (no auth)','OPEN','CRIT'],
+  ['192.168.1.50','9200/tcp','Elasticsearch','OPEN','HIGH'],
+  ['192.168.1.1','3389/tcp','rdp','FILTERED','INFO'],
+  ['192.168.1.10','445/tcp','smb (Win Server)','OPEN','HIGH'],
+];
+
+let monIv=null,monIdx=0,monElapsed=0,monDisc=0,monAlerts=0,monRate=0;
+const timeData={labels:[],hosts:[],ports:[]};
+
+function startMonitor(){
+  if(monIv) return;
+  monIdx=0; monElapsed=0; monDisc=0; monAlerts=0; monRate=0;
+  buildTimeChart();
+  monIv=setInterval(()=>{
+    monElapsed++;
+    monRate=Math.round(150+Math.random()*200);
+    $('rt-rate').textContent=monRate;
+    $('rt-time').textContent=monElapsed+'s';
+    if(monIdx<FEED_DATA.length){
+      const row=FEED_DATA[monIdx++];
+      addFeedRow(row);
+      monDisc=new Set(FEED_DATA.slice(0,monIdx).map(r=>r[0])).size;
+      $('rt-disc').textContent=monDisc;
+      if(row[4]==='CRIT'||row[4]==='HIGH'){monAlerts++;$('rt-alerts').textContent=monAlerts;}
+      timeData.labels.push(monElapsed+'s');
+      timeData.hosts.push(monDisc);
+      timeData.ports.push(monIdx);
+      if(window._timeChart){window._timeChart.update();}
+    } else {clearInterval(monIv);monIv=null;}
+  },900);
+}
+
+function stopMonitor(){if(monIv){clearInterval(monIv);monIv=null;}}
+function clearFeed(){
+  const f=$('live-feed');
+  const hdr=f.querySelector('.feed-hdr').parentNode?f.querySelector('.feed-hdr'):null;
+  f.innerHTML='<div class="feed-row feed-hdr"><span>IP</span><span>PORT</span><span>SERVICE</span><span>STATE</span><span>RISK</span></div>';
+  timeData.labels=[]; timeData.hosts=[]; timeData.ports=[];
+  if(window._timeChart)window._timeChart.update();
+  monIdx=0; monDisc=0; monAlerts=0; $('rt-disc').textContent=0; $('rt-alerts').textContent=0;
+}
+
+function addFeedRow(data){
+  const f=$('live-feed');
+  const riskColors={CRIT:'t-r',HIGH:'t-a',MED:'t-c',LOW:'t-g',INFO:'t-d'};
+  const stateColors={OPEN:'feed-state-o',FILTERED:'feed-state-f',CLOSED:'feed-state-c'};
+  const d=document.createElement('div'); d.className='feed-row pulse-row';
+  d.innerHTML=`<span class="feed-ip">${data[0]}</span><span class="feed-port">${data[1]}</span><span class="feed-svc" style="font-family:var(--body);font-size:12px;">${data[2]}</span><span class="${stateColors[data[3]]||'t-d'}">${data[3]}</span><span class="${riskColors[data[4]]||'t-d'}">${data[4]}</span>`;
+  f.appendChild(d); f.scrollTop=f.scrollHeight;
+}
+
+function buildTimeChart(){
+  if(window._timeChart){window._timeChart.destroy();}
+  const ctx=$('timeChart').getContext('2d');
+  window._timeChart=new Chart(ctx,{type:'line',data:{
+    labels:timeData.labels,
+    datasets:[
+      {label:'Hosts',data:timeData.hosts,borderColor:'#00ff9f',backgroundColor:'#00ff9f20',borderWidth:1.5,tension:.3,pointRadius:2},
+      {label:'Ports',data:timeData.ports,borderColor:'#00d4ff',backgroundColor:'#00d4ff10',borderWidth:1.5,tension:.3,pointRadius:2}
+    ]
+  },options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5a8a6a',font:{size:9}},grid:{color:'#0d1e14'}},y:{ticks:{color:'#5a8a6a',font:{size:9}},grid:{color:'#0d1e14'}}}}});
+}
+
+const QUESTIONS=[
+  {q:'Objective 01: Network Discovery — which flag performs a ping sweep without port scanning?',opts:['-sS','-sn','-sV','-sA'],a:1},
+  {q:'Objective 02: Port Scanning — which scan type sends SYN packets and never completes the handshake?',opts:['-sT (TCP Connect)','-sS (SYN Stealth)','-sU (UDP)','-sX (Xmas)'],a:1},
+  {q:'Objective 03: Service Detection — which flag grabs service banners from open ports?',opts:['--script banner','--script smb','-O','-T4'],a:0},
+  {q:'Objective 04: Version Detection — what flag enables aggressive version detection (0-9 intensity)?',opts:['--version-all','--version-intensity 9','-sV --all','-v --version'],a:1},
+  {q:'Objective 05: OS Detection — how does nmap fingerprint the target OS?',opts:['By reading registry files','By TCP/IP stack behavior analysis','By querying DNS','By port count'],a:1},
+  {q:'Objective 06: Vulnerability Scanning — which NSE category checks for CVEs?',opts:['brute','safe','vuln','auth'],a:2},
+  {q:'Objective 07: OSINT — which script enumerates subdomains via DNS brute force?',opts:['http-title','ssl-cert','dns-brute','smb-os-discovery'],a:2},
+  {q:'Objective 08: Scan Automation — which flag reads targets from a file?',opts:['-iL targets.txt','--file targets.txt','-F','-target list.txt'],a:0},
+  {q:'Objective 09: Result Visualization — which output format is best for parsing into dashboards?',opts:['-oN (normal)','-oX (XML)','-oG (grepable)','-oS (script kiddie)'],a:1},
+  {q:'Objective 10: Report Generation — which flag saves output in all formats simultaneously?',opts:['-oA','-oAll','-save','-output all'],a:0},
+  {q:'Objective 11: Security Assessment — which command runs both default and vuln scripts?',opts:['nmap --vuln','nmap --script=default,vuln','nmap -A --cve','nmap -sV -vuln'],a:1},
+  {q:'Objective 12: UI Design — what nmap flag generates XML for converting to HTML reports?',opts:['-oH','-oX','-oR','-oG'],a:1},
+  {q:'Objective 13: Real-Time Monitoring — which linux tool reruns nmap every 60 seconds?',opts:['cron','watch -n 60','loop -t 60','repeat 60'],a:1},
+];
+
+let qi=0,qs=0,qt=0,streak=0,qOrder=[];
+const pujaMsgs={right:['Correct. Objective locked in.','Exactly right.','That\'s the one.','Good. Keep going.'],wrong:['Wrong. Re-read the objective.','Incorrect. Go back to theory.','Miss. Don\'t let it happen on an engagement.']};
+
+function resetQ(){qs=0;qt=0;streak=0;qi=0;qOrder=[...Array(QUESTIONS.length).keys()].sort(()=>Math.random()-.5);$('qnext').style.display='none';$('qscore').textContent='0/0';$('qacc').textContent='--%';$('qstreak').textContent='0';loadQ();}
+function loadQ(){
+  if(qi>=qOrder.length){$('qtext').textContent=`Complete! ${qs}/${qt} correct.`;$('qopts').innerHTML='';$('puja-q-msg').textContent=qs>=10?'Outstanding. You know all 13 objectives cold.':'Review the objectives and try again.';$('qnext').style.display='none';return;}
+  const q=QUESTIONS[qOrder[qi]];
+  $('qtext').textContent=`Q${qi+1}. ${q.q}`;
+  const opts=$('qopts'); opts.innerHTML='';
+  const sh=[...q.opts.map((o,i)=>({o,i}))].sort(()=>Math.random()-.5);
+  sh.forEach(({o,i})=>{
+    const b=document.createElement('button'); b.className='qopt'; b.textContent=o;
+    b.onclick=()=>checkQ(i===q.a,b,opts,q.a,sh); opts.appendChild(b);
+  });
+}
+function checkQ(correct,btn,opts,ai,sh){
+  qt++;
+  opts.querySelectorAll('.qopt').forEach(b=>b.onclick=null);
+  if(correct){qs++;streak++;btn.classList.add('correct');$('puja-q-msg').textContent=pujaMsgs.right[Math.floor(Math.random()*pujaMsgs.right.length)];}
+  else{streak=0;btn.classList.add('wrong');const cl=sh.find(s=>s.i===ai)?.o;opts.querySelectorAll('.qopt').forEach(b=>{if(b.textContent===cl)b.classList.add('correct');});$('puja-q-msg').textContent=pujaMsgs.wrong[Math.floor(Math.random()*pujaMsgs.wrong.length)];}
+  $('qscore').textContent=`${qs}/${qt}`;
+  $('qacc').textContent=Math.round(qs/qt*100)+'%';
+  $('qstreak').textContent=streak;
+  qi++;$('qnext').style.display='inline-block';
+}
+function nextQ(){$('qnext').style.display='none';loadQ();}
+
+function sw(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.mnb').forEach(b=>b.classList.remove('active'));
+  $(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+renderObjectives();
+animateMetrics();
+setTimeout(buildCharts,300);
+setTimeout(buildTimeChart,400);
+resetQ();
+</script>
